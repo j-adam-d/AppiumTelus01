@@ -9,6 +9,7 @@ import org.example.utilities.RetryUtil;
 import org.example.utilities.WaitUtils;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.Assert;
+import org.testng.Reporter;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -32,7 +33,7 @@ public class FirstTest {
         DesiredCapabilities dc = new DesiredCapabilities();
         dc.setCapability("platformName", "Android");
         dc.setCapability("appium:automationName", "uiautomator2");
-        dc.setCapability("appium:deviceName", "Pixel 9 01");
+        //dc.setCapability("appium:deviceName", "Pixel 9 01");
         dc.setCapability("appium:noReset", false);
         dc.setCapability("appium:fastReset", true);
 
@@ -56,7 +57,7 @@ public class FirstTest {
         driver.terminateApp("com.tubitv");
 
         //Launch the Tubi App
-        androidHome.openApp("Tubi");
+        androidHome.openApp("com.tubitv");
 
         tubiHome.waitForTubiToOpen();
 
@@ -73,15 +74,15 @@ public class FirstTest {
         tubiSection.scrollToMovieAndOpen("Little Monsters");
 
         String movieName = tubiMedia.getMediaName();
-        System.out.println("Movie Name: " + movieName);
+        Reporter.log("Movie Name: " + movieName, true);
         Assert.assertEquals(movieName, "Little Monsters", "Movie Name did not match.");
 
         String movieInfoString = tubiMedia.getMediaInfo();
-        System.out.println("Movie Info: " + movieInfoString);
+        Reporter.log("Movie Info: " + movieInfoString, true);
         Assert.assertEquals(movieInfoString, "1988 · 1 hr 41 min · Comedy, Kids & Family", "Movie Info did not match.");
 
         String movieDescriptionString = tubiMedia.getMediaDescription();
-        System.out.println("Movie Description: " + movieDescriptionString);
+        Reporter.log("Movie Description: " + movieDescriptionString, true);
         Assert.assertEquals(movieDescriptionString, "After young Brian befriends the monster under his bed, he learns that a monster world with no parents may be more than he bargained for.", "Movie Description did not match.");
     }
 

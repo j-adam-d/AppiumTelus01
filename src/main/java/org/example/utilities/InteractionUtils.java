@@ -34,7 +34,7 @@ public class InteractionUtils {
             case ID :
                 waitUtils.waitForElementDisplayed(WaitUtils.Locator.ID, givenIdentifier);
                 waitUtils.waitForElementEnabled(WaitUtils.Locator.ID, givenIdentifier);
-                element = driver.findElement(By.xpath(givenIdentifier));
+                element = driver.findElement(By.id(givenIdentifier));
                 textResult = element.getDomAttribute("text");
                 break;
         }
@@ -70,7 +70,7 @@ public class InteractionUtils {
             case ID :
                 waitUtils.waitForElementDisplayed(WaitUtils.Locator.ID, givenIdentifier);
                 waitUtils.waitForElementEnabled(WaitUtils.Locator.ID, givenIdentifier);
-                element = driver.findElement(By.xpath(givenIdentifier));
+                element = driver.findElement(By.id(givenIdentifier));
                 element.click();
                 break;
         }

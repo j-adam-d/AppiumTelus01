@@ -5,6 +5,7 @@ import org.example.pages.tubi.TubiHome;
 import org.example.pages.tubi.TubiMedia;
 import org.example.pages.tubi.TubiSection;
 import org.example.utilities.InteractionUtils;
+import org.example.utilities.RetryUtil;
 import org.example.utilities.WaitUtils;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.Assert;
@@ -37,15 +38,12 @@ public class FirstTest {
 
         try{
             driver = new AndroidDriver(new URL(appiumServerURL), dc);
-
-            //Terminate the app to ensure a clean and valid test state.
-            driver.terminateApp("com.tubitv");
         } catch (MalformedURLException me){
             me.printStackTrace();
         }
     }
 
-    @Test
+    @Test(retryAnalyzer = RetryUtil.class)
     public void TubiTest(){
         interactionUtils = new InteractionUtils(driver);
         waitUtils = new WaitUtils(driver);
@@ -53,6 +51,9 @@ public class FirstTest {
         tubiHome = new TubiHome(driver);
         tubiSection = new TubiSection(driver);
         tubiMedia = new TubiMedia(driver);
+
+        //Terminate the app to ensure a clean and valid test state.
+        driver.terminateApp("com.tubitv");
 
         //Launch the Tubi App
         androidHome.openApp("Tubi");

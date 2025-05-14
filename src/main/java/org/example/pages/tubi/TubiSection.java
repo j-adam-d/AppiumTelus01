@@ -31,6 +31,10 @@ public class TubiSection {
                 String.format(tubiSectionHeaderXpath, sectionName));
     }
 
+    //This has a weakness.
+    //A 'scroll' sometimes ends where movie poster tiles are halfway cut off.
+    //When the List of movies is created, it sometimes "double-dips" and a movie is checked twice.
+    //This slows down the test and could use refactoring.
     public void scrollToMovieAndOpen(String movieName){
         List<WebElement> movies;
         String expectedName = movieName;

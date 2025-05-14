@@ -1,24 +1,28 @@
 package org.example;
 import io.appium.java_client.android.AndroidDriver;
+import org.example.pages.AndroidHome;
+import org.example.pages.tubi.TubiHome;
+import org.example.pages.tubi.TubiMedia;
+import org.example.pages.tubi.TubiSection;
 import org.example.utilities.InteractionUtils;
 import org.example.utilities.WaitUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Duration;
-import java.util.List;
 
 public class FirstTest {
     public AndroidDriver driver;
     InteractionUtils interactionUtils;
     WaitUtils waitUtils;
+    AndroidHome androidHome;
+    TubiHome tubiHome;
+    TubiSection tubiSection;
+    TubiMedia tubiMedia;
 
     @BeforeTest
     public void setup(){
@@ -39,91 +43,45 @@ public class FirstTest {
         } catch (MalformedURLException me){
             me.printStackTrace();
         }
-
     }
 
     @Test
     public void TubiTest(){
         interactionUtils = new InteractionUtils(driver);
         waitUtils = new WaitUtils(driver);
+        androidHome = new AndroidHome(driver);
+        tubiHome = new TubiHome(driver);
+        tubiSection = new TubiSection(driver);
+        tubiMedia = new TubiMedia(driver);
 
         //Launch the Tubi App
-        interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
-                "(//android.widget.TextView[@content-desc='Tubi'])");
+        androidHome.openApp("Tubi");
 
-        //Wait for the skip button to be visible. If it is not visible (pressed previously), we carry on.
-        waitUtils.waitForElementDisplayed(WaitUtils.Locator.ID, "com.tubitv:id/chip_all");
-        waitUtils.waitForElementEnabled(WaitUtils.Locator.ID, "com.tubitv:id/chip_all");
-        List<WebElement> elements;
-        elements = driver.findElements(By.id("com.tubitv:id/top_skip_button_onboarding"));
+        tubiHome.waitForTubiToOpen();
 
-        if (!elements.isEmpty()){
-            interactionUtils.clickOnElement(InteractionUtils.Locator.ID, "com.tubitv:id/top_skip_button_onboarding");
-        }
+        tubiHome.skipLoginIfNecessary();
 
-        interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
-                "//android.widget.RadioButton[@text='Movies']");
+        tubiHome.clickHomePageFilterButton("Movies");
 
-        //If we run the automation too many times, because we're not logged in, Tubi complains and
-        //inserts a Continue Watching interruption.
-        //We use findElements here (instead of findElement) because it returns a List.
-        //If it fails to find the Continue Watching interruption, it returns an empty list and carries on.
-        driver.findElements(interactionUtils.scrollToElement("Continue Watching"));
+        tubiHome.scrollToSection("Family Movies");
 
-        //Reset the page in case of Continue Watching Interruption
-        driver.findElement(interactionUtils.scrollToTopOfPage("15"));
+        tubiHome.clickSection("Family Movies");
 
-        //We need to create a method of scrolling one screen at a time, and checking for the existence of
-        //the element each scroll, because the Continue Watching Interruption conflicts with scrollIntoView.
-        int maxScrolls = 0;
-        List<WebElement> familyMovies;
-        familyMovies = driver.findElements(By.xpath("//android.widget.TextView[@resource-id='com.tubitv:id/container_name' and @text='Family Movies']"));
-        while (familyMovies.isEmpty() && maxScrolls < 15) {
-            interactionUtils.scrollForward();
-            familyMovies = driver.findElements(By.xpath("//android.widget.TextView[@resource-id='com.tubitv:id/container_name' and @text='Family Movies']"));
-            maxScrolls++;
-        }
+        tubiSection.waitForSectionToLoad("Family Movies");
 
-         interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
-                "//android.widget.TextView[@resource-id='com.tubitv:id/container_name' and @text='Family Movies']");
+        tubiSection.scrollToMovieAndOpen("Little Monsters");
 
-        waitUtils.waitForElementDisplayed(WaitUtils.Locator.XPATH,
-                "//android.widget.TextView[@resource-id='com.tubitv:id/titlebar_title_text_view' and @text='Family Movies']");
-        waitUtils.waitForElementEnabled(WaitUtils.Locator.XPATH,
-                "//android.widget.TextView[@resource-id='com.tubitv:id/titlebar_title_text_view' and @text='Family Movies']");
+        String movieName = tubiMedia.getMediaName();
+        System.out.println("Movie Name: " + movieName);
+        Assert.assertEquals(movieName, "Little Monsters", "Movie Name did not match.");
 
-        List<WebElement> movies;
-        String expectedName = "Jurassic Planet";
-        boolean movieFound = false;
+        String movieInfoString = tubiMedia.getMediaInfo();
+        System.out.println("Movie Info: " + movieInfoString);
+        Assert.assertEquals(movieInfoString, "1988 · 1 hr 41 min · Comedy, Kids & Family", "Movie Info did not match.");
 
-        while(movieFound == false){
-            movies = driver.findElements(By.xpath("(//android.widget.ImageView[@resource-id='com.tubitv:id/video_poster_image_view'])"));
-            for (int i = 1; i <= movies.size(); i++){
-                interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
-                        "(//android.widget.ImageView[@resource-id='com.tubitv:id/video_poster_image_view'])["+i+"]");
-                waitUtils.waitForElementDisplayed(WaitUtils.Locator.ID,
-                        "com.tubitv:id/head_info_title");
-
-                String nameOfMovie = interactionUtils.getElementText(InteractionUtils.Locator.ID, "com.tubitv:id/head_info_title");
-                if(nameOfMovie.equals(expectedName)){
-                    System.out.println("Movie Name: " + nameOfMovie);
-
-                    String movieInfoString = interactionUtils.getElementText(InteractionUtils.Locator.ID, "com.tubitv:id/head_info_duration_and_tags");
-                    System.out.println("Movie Info: " + movieInfoString);
-
-                    String movieDescriptionString = interactionUtils.getElementText(InteractionUtils.Locator.ID, "com.tubitv:id/description");
-
-
-                    movieFound = true;
-                    break;
-                } else {
-                    interactionUtils.clickOnElement(InteractionUtils.Locator.ID, "com.tubitv:id/top_bar_back_icon");
-                    waitUtils.waitForElementDisplayed(WaitUtils.Locator.XPATH, "//android.widget.TextView[@resource-id='com.tubitv:id/titlebar_title_text_view' and @text='Family Movies']");
-                }
-            }
-
-            interactionUtils.scrollForward();
-        }
+        String movieDescriptionString = tubiMedia.getMediaDescription();
+        System.out.println("Movie Description: " + movieDescriptionString);
+        Assert.assertEquals(movieDescriptionString, "After young Brian befriends the monster under his bed, he learns that a monster world with no parents may be more than he bargained for.", "Movie Description did not match.");
     }
 
     @AfterTest

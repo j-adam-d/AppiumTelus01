@@ -7,6 +7,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -47,9 +48,9 @@ public class FirstTest {
     public void TubiTest(){
         WebElement element;
         interactionUtils = new InteractionUtils(driver);
+        waitUtils = new WaitUtils(driver);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
-        interactionUtils.clickOnElement(
-                InteractionUtils.Locator.XPATH,
+        interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
                 "(//android.widget.TextView[@content-desc='Tubi'])");
 
 
@@ -63,27 +64,17 @@ public class FirstTest {
             interactionUtils.clickOnElement(InteractionUtils.Locator.ID, "com.tubitv:id/top_skip_button_onboarding");
         }
 
-        interactionUtils.clickOnElement(
-                InteractionUtils.Locator.XPATH,
+        interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
                 "//android.widget.RadioButton[@text='Movies']");
-
-        //Scroll to the top of the page to ensure previous tests have not left us in a bad state.
-        driver.findElement(AppiumBy.androidUIAutomator(
-                "new UiScrollable(new UiSelector().scrollable(true)).scrollToBeginning(15)"));
 
         //If we run the automation too many times, because we're not logged in, Tubi complains and
         //inserts a Continue Watching interruption.
         //We use findElements here (instead of findElement) because it returns a List.
         //If it fails to find the Continue Watching interruption, it returns an empty list and carries on.
-        driver.findElements(AppiumBy.androidUIAutomator(
-                "new UiScrollable(new UiSelector().scrollable(true))" +
-                        ".scrollIntoView(new UiSelector()" +
-                        ".textContains(\"" + "Continue Watching" + "\")" +
-                        ")"));
+        driver.findElements(interactionUtils.scrollToElement("Continue Watching"));
 
         //Reset the page in case of Continue Watching Interruption
-        driver.findElement(AppiumBy.androidUIAutomator(
-                "new UiScrollable(new UiSelector().scrollable(true)).scrollToBeginning(15)"));
+        driver.findElement(interactionUtils.scrollToTopOfPage("15"));
 
         //We need to create a method of scrolling one screen at a time, and checking for the existence of
         //the element each scroll, because the Continue Watching Interruption conflicts with scrollIntoView.
@@ -91,31 +82,31 @@ public class FirstTest {
         List<WebElement> familyMovies;
         familyMovies = driver.findElements(By.xpath("//android.widget.TextView[@resource-id='com.tubitv:id/container_name' and @text='Family Movies']"));
         while (familyMovies.isEmpty() && maxScrolls < 15) {
-            driver.findElement(AppiumBy.androidUIAutomator(
-                    "new UiScrollable(new UiSelector().scrollable(true)).scrollForward()"));
-
+            interactionUtils.scrollForward();
             familyMovies = driver.findElements(By.xpath("//android.widget.TextView[@resource-id='com.tubitv:id/container_name' and @text='Family Movies']"));
             maxScrolls++;
         }
 
-        element = driver.findElement(By.xpath("//android.widget.TextView[@resource-id='com.tubitv:id/container_name' and @text='Family Movies']"));
-        element.click();
+         interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
+                "//android.widget.TextView[@resource-id='com.tubitv:id/container_name' and @text='Family Movies']");
 
-        wait.until((ExpectedCondition<Boolean>) d ->
-                d.findElement(By.xpath("//android.widget.TextView[@resource-id='com.tubitv:id/titlebar_title_text_view' and @text='Family Movies']")).isDisplayed());
-        wait.until((ExpectedCondition<Boolean>) d ->
-                d.findElement(By.xpath("//android.widget.TextView[@resource-id='com.tubitv:id/titlebar_title_text_view' and @text='Family Movies']")).isEnabled());
+        waitUtils.waitForElementDisplayed(WaitUtils.Locator.XPATH,
+                "//android.widget.TextView[@resource-id='com.tubitv:id/titlebar_title_text_view' and @text='Family Movies']");
+        waitUtils.waitForElementEnabled(WaitUtils.Locator.XPATH,
+                "//android.widget.TextView[@resource-id='com.tubitv:id/titlebar_title_text_view' and @text='Family Movies']");
+
         List<WebElement> movies;
-
         String expectedName = "Jurassic Planet";
         boolean movieFound = false;
 
         while(movieFound == false){
             movies = driver.findElements(By.xpath("(//android.widget.ImageView[@resource-id='com.tubitv:id/video_poster_image_view'])"));
             for (int i = 1; i <= movies.size(); i++){
-                driver.findElement(By.xpath("(//android.widget.ImageView[@resource-id='com.tubitv:id/video_poster_image_view'])["+i+"]")).click();
-                wait.until((ExpectedCondition<Boolean>) d ->
-                        d.findElement(By.id("com.tubitv:id/head_info_title")).isDisplayed());
+                interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
+                        "(//android.widget.ImageView[@resource-id='com.tubitv:id/video_poster_image_view'])["+i+"]");
+                waitUtils.waitForElementDisplayed(WaitUtils.Locator.ID,
+                        "com.tubitv:id/head_info_title");
+
                 WebElement movieName = driver.findElement(By.id("com.tubitv:id/head_info_title"));
                 String nameOfMovie = movieName.getDomAttribute("text");
                 if(nameOfMovie.equals(expectedName)){

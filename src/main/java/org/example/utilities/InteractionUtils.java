@@ -1,11 +1,10 @@
 package org.example.utilities;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 
 public class InteractionUtils {
     public enum Locator{
@@ -20,6 +19,23 @@ public class InteractionUtils {
     public InteractionUtils(AndroidDriver givenDriver){
         this.driver = givenDriver;
         this.waitUtils = new WaitUtils(givenDriver);
+    }
+
+    public void scrollForward(){
+        driver.findElement(AppiumBy.androidUIAutomator(
+                "new UiScrollable(new UiSelector().scrollable(true)).scrollForward()"));
+    }
+
+    public By scrollToTopOfPage(String numberOfScrolls){
+        return AppiumBy.androidUIAutomator(
+                "new UiScrollable(new UiSelector().scrollable(true)).scrollToBeginning(" + numberOfScrolls + ")");
+    }
+
+    public By scrollToElement(String givenIdentifier){
+        return AppiumBy.androidUIAutomator(
+                "new UiScrollable(new UiSelector().scrollable(true))" +
+                        ".scrollIntoView(new UiSelector()" +
+                        ".textContains(\"" + givenIdentifier + "\"))");
     }
 
     public void clickOnElement(Locator givenLocator, String givenIdentifier){

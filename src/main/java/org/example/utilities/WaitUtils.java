@@ -18,7 +18,7 @@ public class WaitUtils {
         TEXT
     }
 
-    WaitUtils(AndroidDriver givenDriver){
+    public WaitUtils(AndroidDriver givenDriver){
         this.driver = givenDriver;
         //This could be turned into a factory where we have a variety of wait times depending on the page in question.
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(40L));

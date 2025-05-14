@@ -16,7 +16,6 @@ public class AndroidHome {
      private static final String appXpath = "(//android.widget.TextView[@content-desc='%s'])";
 
      public void openApp(String appName){
-         System.out.println(String.format(appXpath, appName));
          interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
                  String.format(appXpath, appName));
      }

@@ -1,13 +1,10 @@
 package org.example;
-import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import org.example.utilities.InteractionUtils;
 import org.example.utilities.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -31,12 +28,13 @@ public class FirstTest {
         dc.setCapability("platformName", "Android");
         dc.setCapability("appium:automationName", "uiautomator2");
         dc.setCapability("appium:deviceName", "Pixel 9 01");
-        dc.setCapability("appium:noReset", false); // Reset app state
-        dc.setCapability("appium:fastReset", true); // Reset the app
+        dc.setCapability("appium:noReset", false);
+        dc.setCapability("appium:fastReset", true);
 
         try{
             driver = new AndroidDriver(new URL(appiumServerURL), dc);
-            //Terminate the App in case another test crashed.
+
+            //Terminate the app to ensure a clean and valid test state.
             driver.terminateApp("com.tubitv");
         } catch (MalformedURLException me){
             me.printStackTrace();
@@ -46,13 +44,12 @@ public class FirstTest {
 
     @Test
     public void TubiTest(){
-        WebElement element;
         interactionUtils = new InteractionUtils(driver);
         waitUtils = new WaitUtils(driver);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+
+        //Launch the Tubi App
         interactionUtils.clickOnElement(InteractionUtils.Locator.XPATH,
                 "(//android.widget.TextView[@content-desc='Tubi'])");
-
 
         //Wait for the skip button to be visible. If it is not visible (pressed previously), we carry on.
         waitUtils.waitForElementDisplayed(WaitUtils.Locator.ID, "com.tubitv:id/chip_all");
@@ -107,31 +104,25 @@ public class FirstTest {
                 waitUtils.waitForElementDisplayed(WaitUtils.Locator.ID,
                         "com.tubitv:id/head_info_title");
 
-                WebElement movieName = driver.findElement(By.id("com.tubitv:id/head_info_title"));
-                String nameOfMovie = movieName.getDomAttribute("text");
+                String nameOfMovie = interactionUtils.getElementText(InteractionUtils.Locator.ID, "com.tubitv:id/head_info_title");
                 if(nameOfMovie.equals(expectedName)){
                     System.out.println("Movie Name: " + nameOfMovie);
 
-                    WebElement movieInfoElement = driver.findElement(By.id("com.tubitv:id/head_info_duration_and_tags"));
-                    String movieInfoString = movieInfoElement.getDomAttribute("text");
-
+                    String movieInfoString = interactionUtils.getElementText(InteractionUtils.Locator.ID, "com.tubitv:id/head_info_duration_and_tags");
                     System.out.println("Movie Info: " + movieInfoString);
 
-                    WebElement movieDescriptionElement = driver.findElement(By.id("com.tubitv:id/description"));
-                    String movieDescriptionString = movieDescriptionElement.getDomAttribute("text");
+                    String movieDescriptionString = interactionUtils.getElementText(InteractionUtils.Locator.ID, "com.tubitv:id/description");
 
-                    System.out.println("Movie Description: " + movieDescriptionString);
+
                     movieFound = true;
                     break;
                 } else {
-                    driver.findElement(By.id("com.tubitv:id/top_bar_back_icon")).click();
-                    wait.until((ExpectedCondition<Boolean>) d ->
-                            d.findElement(By.xpath("//android.widget.TextView[@resource-id='com.tubitv:id/titlebar_title_text_view' and @text='Family Movies']")).isDisplayed());
+                    interactionUtils.clickOnElement(InteractionUtils.Locator.ID, "com.tubitv:id/top_bar_back_icon");
+                    waitUtils.waitForElementDisplayed(WaitUtils.Locator.XPATH, "//android.widget.TextView[@resource-id='com.tubitv:id/titlebar_title_text_view' and @text='Family Movies']");
                 }
             }
 
-            driver.findElement(AppiumBy.androidUIAutomator(
-                "new UiScrollable(new UiSelector().scrollable(true)).scrollForward()"));
+            interactionUtils.scrollForward();
         }
     }
 

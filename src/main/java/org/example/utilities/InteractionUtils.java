@@ -21,6 +21,26 @@ public class InteractionUtils {
         this.waitUtils = new WaitUtils(givenDriver);
     }
 
+    public String getElementText(Locator givenLocator, String givenIdentifier){
+        WebElement element;
+        String textResult = "";
+        switch (givenLocator){
+            case XPATH :
+                waitUtils.waitForElementDisplayed(WaitUtils.Locator.XPATH, givenIdentifier);
+                waitUtils.waitForElementEnabled(WaitUtils.Locator.XPATH, givenIdentifier);
+                element = driver.findElement(By.xpath(givenIdentifier));
+                textResult = element.getDomAttribute("text");
+                break;
+            case ID :
+                waitUtils.waitForElementDisplayed(WaitUtils.Locator.ID, givenIdentifier);
+                waitUtils.waitForElementEnabled(WaitUtils.Locator.ID, givenIdentifier);
+                element = driver.findElement(By.xpath(givenIdentifier));
+                textResult = element.getDomAttribute("text");
+                break;
+        }
+        return textResult;
+    }
+
     public void scrollForward(){
         driver.findElement(AppiumBy.androidUIAutomator(
                 "new UiScrollable(new UiSelector().scrollable(true)).scrollForward()"));

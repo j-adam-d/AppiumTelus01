@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!-- to run this mvn clean test -DsuiteXmlFile.suiteXmlFiles=testng.xml-->
+
+<suite name="Suite1" verbose="1">
+    <test name="FirstTest">
+        <classes>
+            <class name="org.example.FirstTest"></class>
+        </classes>
+    </test>
+</suite>
+
